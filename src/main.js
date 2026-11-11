@@ -20,7 +20,7 @@ function createWindow() {
     height: 860,
     minWidth: 1100,
     minHeight: 720,
-    backgroundColor: '#14161c',
+    backgroundColor: '#ffffff',
     title: '3DS Theme Studio — heivoli-network.fr',
     icon: path.join(__dirname, '..', 'build', 'icon.png'),
     webPreferences: {
@@ -115,6 +115,18 @@ ipcMain.handle('qr:start', async (_e, preferred) => {
   const ip = (ips.find((i) => i.address === preferred) || ips[0]).address;
   const url = `http://${ip}:${port}/theme/${encodeURIComponent(current.name)}.zip`;
   return { url, svg: qr.toSvg(url), ips, ip };
+});
+
+ipcMain.handle('image:fetch', async (_e, url) => {
+  // Image glissée ou collée depuis un site web : téléchargée ici, sans passer par le disque
+  if (!/^https?:\/\//i.test(String(url))) throw new Error('Adresse invalide');
+  const res = await fetch(url, { redirect: 'follow' });
+  if (!res.ok) throw new Error(`Image inaccessible (${res.status})`);
+  const type = (res.headers.get('content-type') || '').split(';')[0];
+  if (!type.startsWith('image/')) throw new Error("Ce lien n'est pas une image");
+  const buf = Buffer.from(await res.arrayBuffer());
+  if (buf.length > 25 * 1024 * 1024) throw new Error('Image trop lourde (25 Mo max)');
+  return `data:${type};base64,${buf.toString('base64')}`;
 });
 
 ipcMain.handle('qr:stop', () => { stopServer(); return true; });

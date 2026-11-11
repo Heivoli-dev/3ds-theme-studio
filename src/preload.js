@@ -5,6 +5,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('studio', {
   buildTheme: (t) => ipcRenderer.invoke('theme:build', t),
   saveTheme: () => ipcRenderer.invoke('theme:save'),
+  fetchImage: (url) => ipcRenderer.invoke('image:fetch', url),
   startQr: (ip) => ipcRenderer.invoke('qr:start', ip),
   stopQr: () => ipcRenderer.invoke('qr:stop'),
   saveProject: (json) => ipcRenderer.invoke('project:save', json),

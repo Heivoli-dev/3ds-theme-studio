@@ -291,11 +291,55 @@ function setupDrop(zone, input, onFile) {
   zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('over'));
   zone.addEventListener('drop', (e) => {
-    e.preventDefault(); zone.classList.remove('over');
+    e.preventDefault(); e.stopPropagation(); zone.classList.remove('over');
     const f = e.dataTransfer.files[0];
     if (f) onFile(f);
+    else if (zone.id !== 'dropBgm') imageFromTransfer(e.dataTransfer).then((u) => u && applyImage(screenOf(), u));
   });
 }
+
+/* ---------- Images depuis le web / le presse-papiers (sans téléchargement manuel) ---------- */
+function urlFromTransfer(dt) {
+  const html = dt.getData('text/html');
+  const m = html && html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (m) return m[1].replace(/&amp;/g, '&');
+  const uri = (dt.getData('text/uri-list') || dt.getData('text/plain') || '').split('\n').find((l) => l && !l.startsWith('#'));
+  return uri ? uri.trim() : null;
+}
+async function imageFromTransfer(dt) {
+  const url = urlFromTransfer(dt);
+  if (!url) return null;
+  if (url.startsWith('data:image/')) return url;
+  if (!/^https?:\/\//i.test(url)) return null;
+  toast("Récupération de l'image…");
+  try { return await window.studio.fetchImage(url); }
+  catch (e) { toast(e.message, true); return null; }
+}
+function applyImage(which, url) {
+  if (tab === 'info') { state.icon = { mode: 'image', image: url }; syncPanel(); scheduleRender(); return toast('Icône mise à jour'); }
+  tab = which;
+  Object.assign(state[which], { image: url, mode: 'image', zoom: 1, ox: 0, oy: 0 });
+  syncPanel(); scheduleRender();
+  toast(which === 'top' ? "Image appliquée à l'écran du haut" : "Image appliquée à l'écran du bas");
+}
+
+document.addEventListener('dragover', (e) => e.preventDefault());
+document.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  const scr = e.target.closest && e.target.closest('.screen');
+  const which = scr ? scr.dataset.screen : screenOf();
+  const f = e.dataTransfer.files[0];
+  const url = f && f.type.startsWith('image/') ? await readAsDataURL(f) : await imageFromTransfer(e.dataTransfer);
+  if (url) applyImage(which, url);
+});
+document.addEventListener('paste', async (e) => {
+  if (e.target.matches && e.target.matches('input[type=text], textarea')) return;
+  const item = Array.from(e.clipboardData.items).find((i) => i.type.startsWith('image/'));
+  e.preventDefault();
+  const url = item ? await readAsDataURL(item.getAsFile()) : await imageFromTransfer(e.clipboardData);
+  if (url) applyImage(screenOf(), url);
+  else toast("Copiez une image (clic droit → Copier l'image) puis recollez", true);
+});
 
 const readAsDataURL = (file) => new Promise((res, rej) => {
   const r = new FileReader();

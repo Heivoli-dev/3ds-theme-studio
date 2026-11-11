@@ -14,6 +14,7 @@ window.studio = {
   buildTheme: async (t) => { window.__payload = Object.fromEntries(Object.entries(t).map(([k,v]) => [k, v instanceof Uint8Array ? enc(v) : v])); return {name:'Test', size: 123456}; },
   saveTheme: async () => ({ok:true}),
   startQr: async () => ({ url:'http://192.168.1.20:8383/theme/Test.zip', svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#000"/></svg>', ips:[{address:'192.168.1.20', ifname:'en0'}], ip:'192.168.1.20' }),
+  fetchImage: async (u) => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   stopQr: async () => true, saveProject: async () => true, openProject: async () => null, onDownloaded: () => {},
 };
 """
