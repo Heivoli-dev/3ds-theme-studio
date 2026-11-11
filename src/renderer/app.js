@@ -15,7 +15,15 @@ const defaultScreen = (c1, c2) => ({
 });
 
 // Photo de 2DS XL fournie par heivoli-network.fr, écrans calés au pixel
-const DEFAULT_DEVICE = { photo: 'assets/2ds-xl.png', top: { x: 17.034, y: 6.0, w: 65.198 }, bottom: { x: 22.89, y: 56.203, w: 52.437 } };
+const DEFAULT_DEVICE = {
+  photo: 'assets/2ds-xl.png',
+  // coins réels des écrans (pixels de l'image 1400×1400) : haut-gauche, haut-droit, bas-droit, bas-gauche
+  quads: {
+    top: [[246.4, 88.2], [1153.0, 85.2], [1136.5, 636.4], [265.3, 638.9]],
+    bottom: [[360.8, 833.6], [1044.7, 831.7], [1033.7, 1325.2], [373.6, 1326.4]],
+  },
+  top: { x: 18, y: 6, w: 64 }, bottom: { x: 26, y: 59, w: 49 },
+};
 
 let state = {
   top: defaultScreen('#ff4d5e', '#6a3cff'),
@@ -432,6 +440,8 @@ function initStage() {
   };
   $('#btnPhotoReset').onclick = () => { state.device.photo = null; document.body.classList.remove('calibrating'); syncPanel(); };
   $('#btnDefaultPhoto').onclick = () => { state.device = JSON.parse(JSON.stringify(DEFAULT_DEVICE)); document.body.classList.remove('calibrating'); syncPanel(); };
+  $('#photoImg').addEventListener('load', syncPhoto);
+  new ResizeObserver(() => syncPhoto()).observe($('#photoImg'));
   // Les repères du menu HOME suivent la taille des écrans de la photo
   for (const [id, w] of [['#phTop', 400], ['#phBottom', 320]]) {
     const el = $(id);
@@ -471,23 +481,50 @@ function syncPhoto() {
   const has = !!state.device.photo;
   $('#device').classList.toggle('hidden', has);
   $('#photoDevice').classList.toggle('hidden', !has);
-  $('#btnCalib').classList.toggle('hidden', !has);
   $('#btnPhotoReset').classList.toggle('hidden', !has);
   $('#btnDefaultPhoto').classList.toggle('hidden', state.device.photo === DEFAULT_DEVICE.photo);
   $('#btnCalib').classList.toggle('hidden', !has || state.device.photo === DEFAULT_DEVICE.photo);
   $('#optShell').parentElement.classList.toggle('hidden', has);
-  $('#btnDefaultPhoto').classList.toggle('hidden', state.device.photo === DEFAULT_DEVICE.photo);
   if (!has) return;
   const img = $('#photoImg');
   if (img.getAttribute('src') !== state.device.photo) img.src = state.device.photo;
-  const place = (el, d, ar) => {
-    el.style.left = d.x + '%';
-    el.style.top = d.y + '%';
-    el.style.width = d.w + '%';
-    el.style.aspectRatio = ar;
+  const quads = state.device.photo === DEFAULT_DEVICE.photo ? DEFAULT_DEVICE.quads : null;
+  const place = (el, d, ar, w, quad) => {
+    if (quad && img.naturalWidth && img.clientWidth) {
+      // perspective exacte : rectangle w×240 projeté sur les 4 coins de l'écran
+      const k = img.clientWidth / img.naturalWidth;
+      Object.assign(el.style, { left: '0', top: '0', width: w + 'px', height: '240px', aspectRatio: 'auto', transformOrigin: '0 0',
+        transform: quadTransform(w, 240, quad.map(([x, y]) => [x * k, y * k])) });
+      return;
+    }
+    Object.assign(el.style, { left: d.x + '%', top: d.y + '%', width: d.w + '%', height: 'auto', aspectRatio: ar, transform: 'none' });
   };
-  place($('#phTop'), state.device.top, '400 / 240');
-  place($('#phBottom'), state.device.bottom, '320 / 240');
+  place($('#phTop'), state.device.top, '400 / 240', 400, quads && quads.top);
+  place($('#phBottom'), state.device.bottom, '320 / 240', 320, quads && quads.bottom);
+}
+
+// Homographie : rectangle (0,0)-(w,h) -> quadrilatère, en matrix3d CSS
+function quadTransform(w, h, q) {
+  const src = [[0, 0], [w, 0], [w, h], [0, h]];
+  const A = [], B = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = src[i], [u, v] = q[i];
+    A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); B.push(u);
+    A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); B.push(v);
+  }
+  // élimination de Gauss
+  for (let c = 0; c < 8; c++) {
+    let p = c;
+    for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    [A[c], A[p]] = [A[p], A[c]]; [B[c], B[p]] = [B[p], B[c]];
+    for (let r = 0; r < 8; r++) if (r !== c) {
+      const f = A[r][c] / A[c][c];
+      for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k];
+      B[r] -= f * B[c];
+    }
+  }
+  const H = B.map((b, i) => b / A[i][i]);
+  return `matrix3d(${H[0]},${H[3]},0,${H[6]},${H[1]},${H[4]},0,${H[7]},0,0,1,0,${H[2]},${H[5]},0,1)`;
 }
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
