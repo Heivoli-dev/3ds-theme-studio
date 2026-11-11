@@ -14,13 +14,16 @@ const defaultScreen = (c1, c2) => ({
   text: '', textColor: '#ffffff', textSize: 28, textPos: 'center',
 });
 
+// Photo de 2DS XL fournie par heivoli-network.fr, écrans calés au pixel
+const DEFAULT_DEVICE = { photo: 'assets/2ds-xl.png', top: { x: 17.034, y: 6.0, w: 65.198 }, bottom: { x: 22.89, y: 56.203, w: 52.437 } };
+
 let state = {
   top: defaultScreen('#ff4d5e', '#6a3cff'),
   bottom: defaultScreen('#1b1f2a', '#3a2a5c'),
   info: { title: 'Mon thème', description: 'Créé avec 3DS Theme Studio', author: 'heivoli-network.fr' },
   icon: { mode: 'auto', image: null },
   bgm: null, // { name, b64 }
-  device: { photo: null, top: { x: 20, y: 8, w: 60 }, bottom: { x: 26, y: 56, w: 48 } },
+  device: JSON.parse(JSON.stringify(DEFAULT_DEVICE)),
   overlay: true, shell: true,
 };
 
@@ -428,6 +431,16 @@ function initStage() {
     toast('Déplacez et redimensionnez les deux cadres sur les écrans de votre photo');
   };
   $('#btnPhotoReset').onclick = () => { state.device.photo = null; document.body.classList.remove('calibrating'); syncPanel(); };
+  $('#btnDefaultPhoto').onclick = () => { state.device = JSON.parse(JSON.stringify(DEFAULT_DEVICE)); document.body.classList.remove('calibrating'); syncPanel(); };
+  // Les repères du menu HOME suivent la taille des écrans de la photo
+  for (const [id, w] of [['#phTop', 400], ['#phBottom', 320]]) {
+    const el = $(id);
+    new ResizeObserver(() => {
+      const ov = el.querySelector('.overlay');
+      if (!ov) return;
+      Object.assign(ov.style, { width: w + 'px', height: '240px', inset: 'auto', left: '0', top: '0', transformOrigin: '0 0', transform: `scale(${el.clientWidth / w})` });
+    }).observe(el);
+  }
   $('#btnCalib').onclick = () => {
     const on = document.body.classList.toggle('calibrating');
     $('#btnCalib').textContent = on ? 'Terminer le calage' : 'Caler les écrans';
@@ -460,7 +473,10 @@ function syncPhoto() {
   $('#photoDevice').classList.toggle('hidden', !has);
   $('#btnCalib').classList.toggle('hidden', !has);
   $('#btnPhotoReset').classList.toggle('hidden', !has);
+  $('#btnDefaultPhoto').classList.toggle('hidden', state.device.photo === DEFAULT_DEVICE.photo);
+  $('#btnCalib').classList.toggle('hidden', !has || state.device.photo === DEFAULT_DEVICE.photo);
   $('#optShell').parentElement.classList.toggle('hidden', has);
+  $('#btnDefaultPhoto').classList.toggle('hidden', state.device.photo === DEFAULT_DEVICE.photo);
   if (!has) return;
   const img = $('#photoImg');
   if (img.getAttribute('src') !== state.device.photo) img.src = state.device.photo;
