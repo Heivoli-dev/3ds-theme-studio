@@ -21,24 +21,61 @@
     "appId": "fr.heivoli-network.3dsthemestudio",
     "productName": "3DS Theme Studio",
     "copyright": "© heivoli-network.fr",
-    "directories": { "output": "dist", "buildResources": "build" },
-    "files": ["src/**/*", "build/icon.png", "package.json"],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
     "mac": {
       "category": "public.app-category.graphics-design",
-      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "dmg",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icon.png",
       "identity": null
     },
-    "dmg": { "artifactName": "3DS-Theme-Studio-${version}-mac-${arch}.${ext}" },
+    "dmg": {
+      "artifactName": "3DS-Theme-Studio-Mac-${arch}.${ext}"
+    },
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "portable", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "3DS-Theme-Studio-${version}-windows-setup.${ext}"
+      "artifactName": "3DS-Theme-Studio-Windows-Setup.${ext}"
     },
-    "portable": { "artifactName": "3DS-Theme-Studio-${version}-windows-portable.${ext}" }
+    "portable": {
+      "artifactName": "3DS-Theme-Studio-Windows-Portable.${ext}"
+    }
   }
 }

@@ -40,6 +40,11 @@ jobs:
       - run: npm run ${{ matrix.script }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Noms de fichiers stables
+        if: runner.os == 'macOS'
+        run: |
+          mv dist/3DS-Theme-Studio-Mac-arm64.dmg dist/3DS-Theme-Studio-Mac-Apple-Silicon.dmg
+          mv dist/3DS-Theme-Studio-Mac-x64.dmg dist/3DS-Theme-Studio-Mac-Intel.dmg
       - uses: actions/upload-artifact@v4
         with:
           name: 3ds-theme-studio-${{ runner.os }}

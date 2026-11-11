@@ -26,10 +26,12 @@ Téléchargez la dernière version dans l'onglet **Releases** :
 
 | Système | Fichier |
 | --- | --- |
-| macOS Apple Silicon | `3DS-Theme-Studio-x.y.z-mac-arm64.dmg` |
-| macOS Intel | `3DS-Theme-Studio-x.y.z-mac-x64.dmg` |
-| Windows (installateur) | `3DS-Theme-Studio-x.y.z-windows-setup.exe` |
-| Windows (portable) | `3DS-Theme-Studio-x.y.z-windows-portable.exe` |
+| macOS Apple Silicon (M1 et plus) | `3DS-Theme-Studio-Mac-Apple-Silicon.dmg` |
+| macOS Intel | `3DS-Theme-Studio-Mac-Intel.dmg` |
+| Windows (installateur) | `3DS-Theme-Studio-Windows-Setup.exe` |
+| Windows (portable) | `3DS-Theme-Studio-Windows-Portable.exe` |
+
+Aussi disponible sur <https://heivoli-network.fr/logiciels.html>.
 
 > **macOS** : l'application n'est pas signée. Au premier lancement, faites clic droit → **Ouvrir**, ou exécutez
 > `xattr -dr com.apple.quarantine "/Applications/3DS Theme Studio.app"`.
