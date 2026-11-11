@@ -374,9 +374,10 @@ function b64ToBytes(b64) {
 function initStage() {
   // grille d'icônes du menu HOME (schéma)
   const grid = $('#hmGrid');
-  for (let i = 0; i < 18; i++) {
+  const tiles = ['#f2a65a', '#6cc3e8', '#9b8cf0', '#7fd18b', '#f07a8a'];
+  for (let i = 0; i < 24; i++) {
     const c = document.createElement('i');
-    if (i >= 7) c.className = 'empty';
+    if (i < tiles.length) c.style.setProperty('--c', tiles[i]); else c.className = 'empty';
     if (i === 0) c.classList.add('sel');
     grid.appendChild(c);
   }
@@ -387,7 +388,9 @@ function initStage() {
   const tick = () => {
     const d = new Date();
     const t = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    $$('.hm-clock').forEach((e) => (e.textContent = t));
+    $$('.hm-clock').forEach((e) => (e.textContent = t.replace(':', ' ')));
+    const day = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'][d.getDay()];
+    $$('.hm-date').forEach((e) => (e.textContent = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')} (${day})`));
   };
   tick(); setInterval(tick, 15000);
 

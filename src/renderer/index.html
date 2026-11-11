@@ -175,7 +175,17 @@
               <div class="screen" id="topScreen" data-screen="top">
                 <canvas id="cvTop" width="400" height="240"></canvas>
                 <div class="overlay home-top">
-                  <div class="hm-bar"><span class="hm-pill"></span><span class="hm-clock" id="hmClock">12:00</span><span class="hm-batt"><i></i></span></div>
+                  <div class="hm-status">
+                    <span class="hm-signal"><i></i><i></i><i></i><i></i></span>
+                    <span class="hm-net">Internet</span>
+                    <span class="hm-steps">27</span>
+                    <span class="hm-spacer"></span>
+                    <span class="hm-date">12/11 (jeu)</span>
+                    <span class="hm-clock">12:00</span>
+                    <span class="hm-batt"><i></i></span>
+                  </div>
+                  <div class="hm-hint left"><span class="hm-cam"></span><span class="hm-key">Y</span></div>
+                  <div class="hm-hint right"><span class="hm-cam"></span><span class="hm-key sq">L</span>+<span class="hm-key sq">R</span></div>
                 </div>
               </div>
             </div>
@@ -188,9 +198,14 @@
               <div class="screen" id="bottomScreen" data-screen="bottom">
                 <canvas id="cvBottom" width="320" height="240"></canvas>
                 <div class="overlay home-bottom">
-                  <div class="hm-top"><b></b><b></b><b></b><b></b><b></b></div>
+                  <div class="hm-tools">
+                    <b class="home">⌂</b>
+                    <span class="hm-apps"><b style="--c:#e8b84a">✎</b><b style="--c:#f08a4b">☺</b><b style="--c:#3fb59a">≡</b><b style="--c:#3d8ee6">◍</b><b style="--c:#5bb85a">⁂</b></span>
+                    <span class="hm-view"><b>■</b><b>▦</b></span>
+                  </div>
                   <div class="hm-grid" id="hmGrid"></div>
-                  <div class="hm-foot"><b></b><b></b></div>
+                  <span class="hm-arrow l">‹</span><span class="hm-arrow r">›</span>
+                  <div class="hm-folder">Créer un dossier</div>
                 </div>
               </div>
             </div>
