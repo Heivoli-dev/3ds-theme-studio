@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; media-src 'self' data: blob:" />
+  <title>3DS Theme Studio — heivoli-network.fr</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"><span></span><span></span></div>
+      <div>
+        <h1>3DS Theme Studio</h1>
+        <p>Créateur de thèmes pour Anemone3DS</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="ghost" id="btnOpen">Ouvrir un projet</button>
+      <button class="ghost" id="btnSaveProject">Enregistrer le projet</button>
+      <button class="secondary" id="btnExport">Exporter le .zip</button>
+      <button class="primary" id="btnQr">QR code Anemone3DS</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Panneau d'édition -->
+    <aside class="panel">
+      <nav class="tabs" id="tabs">
+        <button data-tab="top" class="active">Haut</button>
+        <button data-tab="bottom">Bas</button>
+        <button data-tab="info">Infos</button>
+        <button data-tab="music">Musique</button>
+      </nav>
+
+      <section class="tab-body" id="screenEditor">
+        <div class="field">
+          <label>Fond</label>
+          <div class="seg" id="modeSeg">
+            <button data-mode="color">Couleur</button>
+            <button data-mode="gradient">Dégradé</button>
+            <button data-mode="image">Image</button>
+          </div>
+        </div>
+
+        <div class="group" data-show="color gradient">
+          <div class="row">
+            <div class="field"><label>Couleur 1</label><input type="color" data-k="color1" /></div>
+            <div class="field" data-show="gradient"><label>Couleur 2</label><input type="color" data-k="color2" /></div>
+          </div>
+          <div class="field" data-show="gradient">
+            <label>Angle <output data-o="angle"></output></label>
+            <input type="range" min="0" max="360" step="1" data-k="angle" />
+          </div>
+          <div class="swatches" id="swatches"></div>
+        </div>
+
+        <div class="group" data-show="image">
+          <div class="drop" id="drop">
+            <div class="drop-inner">
+              <strong>Glissez une image ici</strong>
+              <span>ou cliquez pour parcourir — PNG, JPG, GIF, WebP</span>
+              <span class="dim" id="dropHint"></span>
+            </div>
+            <input type="file" id="fileImage" accept="image/*" hidden />
+          </div>
+          <div class="field">
+            <label>Cadrage</label>
+            <div class="seg" id="fitSeg">
+              <button data-fit="cover">Remplir</button>
+              <button data-fit="contain">Ajuster</button>
+              <button data-fit="stretch">Étirer</button>
+            </div>
+          </div>
+          <div class="field"><label>Zoom <output data-o="zoom"></output></label><input type="range" min="0.5" max="4" step="0.01" data-k="zoom" /></div>
+          <div class="row">
+            <div class="field"><label>Position X</label><input type="range" min="-1" max="1" step="0.005" data-k="ox" /></div>
+            <div class="field"><label>Position Y</label><input type="range" min="-1" max="1" step="0.005" data-k="oy" /></div>
+          </div>
+          <div class="field"><label>Couleur de fond (bandes)</label><input type="color" data-k="color1" /></div>
+          <p class="tip">Astuce : faites glisser directement l'image dans l'aperçu pour la déplacer, molette pour zoomer.</p>
+        </div>
+
+        <details class="group" open>
+          <summary>Effets</summary>
+          <div class="field">
+            <label>Motif</label>
+            <select data-k="pattern">
+              <option value="none">Aucun</option>
+              <option value="dots">Pois</option>
+              <option value="stripes">Rayures</option>
+              <option value="grid">Grille</option>
+              <option value="checker">Damier</option>
+              <option value="waves">Vagues</option>
+            </select>
+          </div>
+          <div class="field"><label>Opacité du motif <output data-o="patternOpacity"></output></label><input type="range" min="0" max="1" step="0.01" data-k="patternOpacity" /></div>
+          <div class="field"><label>Luminosité <output data-o="brightness"></output></label><input type="range" min="-1" max="1" step="0.01" data-k="brightness" /></div>
+          <div class="field"><label>Vignette <output data-o="vignette"></output></label><input type="range" min="0" max="1" step="0.01" data-k="vignette" /></div>
+        </details>
+
+        <details class="group">
+          <summary>Texte</summary>
+          <div class="field"><label>Texte affiché</label><input type="text" data-k="text" placeholder="Ex. : Mon super thème" maxlength="40" /></div>
+          <div class="row">
+            <div class="field"><label>Couleur</label><input type="color" data-k="textColor" /></div>
+            <div class="field"><label>Taille <output data-o="textSize"></output></label><input type="range" min="10" max="72" step="1" data-k="textSize" /></div>
+          </div>
+          <div class="field">
+            <label>Position</label>
+            <div class="seg" id="textPosSeg">
+              <button data-tp="top">Haut</button>
+              <button data-tp="center">Centre</button>
+              <button data-tp="bottom">Bas</button>
+            </div>
+          </div>
+        </details>
+
+        <button class="ghost small" id="btnCopyScreen"></button>
+      </section>
+
+      <section class="tab-body hidden" id="infoEditor">
+        <div class="field"><label>Nom du thème</label><input type="text" id="title" maxlength="63" /></div>
+        <div class="field"><label>Description</label><textarea id="description" maxlength="127" rows="3"></textarea></div>
+        <div class="field"><label>Auteur</label><input type="text" id="author" maxlength="63" /></div>
+        <div class="field">
+          <label>Icône (48×48)</label>
+          <div class="icon-row">
+            <canvas id="iconCanvas" width="48" height="48"></canvas>
+            <div class="stack">
+              <div class="seg" id="iconSeg">
+                <button data-icon="auto">Auto (écran du haut)</button>
+                <button data-icon="image">Image</button>
+              </div>
+              <input type="file" id="fileIcon" accept="image/*" hidden />
+            </div>
+          </div>
+        </div>
+        <p class="tip">Ces informations s'affichent dans la liste d'Anemone3DS et dans le menu « Paramètres du thème » de la console.</p>
+      </section>
+
+      <section class="tab-body hidden" id="musicEditor">
+        <div class="drop" id="dropBgm">
+          <div class="drop-inner">
+            <strong>Musique de fond (.bcstm)</strong>
+            <span id="bgmName">Aucune musique — le thème sera silencieux</span>
+          </div>
+          <input type="file" id="fileBgm" accept=".bcstm" hidden />
+        </div>
+        <button class="ghost small" id="btnRemoveBgm">Retirer la musique</button>
+        <p class="tip">La console lit uniquement le format <b>BCSTM</b> (3,3 Mo maximum pour un thème). Convertissez votre MP3/WAV avec un outil comme <i>vgmstream</i> / <i>LoopingAudioConverter</i>, puis importez le fichier ici.</p>
+      </section>
+
+      <footer class="panel-foot">© <span id="year"></span> <a href="https://heivoli-network.fr" target="_blank">heivoli-network.fr</a></footer>
+    </aside>
+
+    <!-- Aperçu -->
+    <section class="stage">
+      <div class="stage-tools">
+        <label class="switch"><input type="checkbox" id="optOverlay" checked /><span></span>Afficher le menu HOME</label>
+        <label class="switch"><input type="checkbox" id="optShell" checked /><span></span>Afficher le boîtier</label>
+        <div class="spacer"></div>
+        <button class="ghost small" id="btnPhoto">Utiliser ma photo de console</button>
+        <button class="ghost small hidden" id="btnCalib">Caler les écrans</button>
+        <button class="ghost small hidden" id="btnPhotoReset">Revenir au boîtier</button>
+        <input type="file" id="filePhoto" accept="image/*" hidden />
+      </div>
+
+      <div class="device-wrap" id="deviceWrap">
+        <div class="device" id="device">
+          <div class="shell top-shell">
+            <div class="cam"></div>
+            <div class="bezel top-bezel">
+              <div class="screen" id="topScreen" data-screen="top">
+                <canvas id="cvTop" width="400" height="240"></canvas>
+                <div class="overlay home-top">
+                  <div class="hm-bar"><span class="hm-pill"></span><span class="hm-clock" id="hmClock">12:00</span><span class="hm-batt"><i></i></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="leds"><i></i><i></i></div>
+          </div>
+          <div class="hinge"></div>
+          <div class="shell bottom-shell">
+            <div class="pad"><div class="stick"></div><div class="dpad"><i></i><i></i></div></div>
+            <div class="bezel bottom-bezel">
+              <div class="screen" id="bottomScreen" data-screen="bottom">
+                <canvas id="cvBottom" width="320" height="240"></canvas>
+                <div class="overlay home-bottom">
+                  <div class="hm-top"><b></b><b></b><b></b><b></b><b></b></div>
+                  <div class="hm-grid" id="hmGrid"></div>
+                  <div class="hm-foot"><b></b><b></b></div>
+                </div>
+              </div>
+            </div>
+            <div class="abxy"><i></i><i></i><i></i><i></i></div>
+            <div class="sys"><i></i><i></i><i></i></div>
+          </div>
+        </div>
+
+        <div class="photo-device hidden" id="photoDevice">
+          <img id="photoImg" alt="Photo de la console" />
+          <div class="screen ph" id="phTop" data-screen="top"><canvas id="cvTopPh" width="400" height="240"></canvas><div class="calib-handle"></div></div>
+          <div class="screen ph" id="phBottom" data-screen="bottom"><canvas id="cvBottomPh" width="320" height="240"></canvas><div class="calib-handle"></div></div>
+        </div>
+      </div>
+
+      <p class="stage-hint" id="stageHint">Cliquez sur un écran pour l'éditer.</p>
+    </section>
+  </main>
+
+  <!-- Fenêtre QR -->
+  <div class="modal hidden" id="qrModal">
+    <div class="modal-card">
+      <button class="close" id="qrClose">×</button>
+      <h2>Installer avec Anemone3DS</h2>
+      <div class="qr-body">
+        <div class="qr-box" id="qrBox"></div>
+        <ol>
+          <li>Connectez la 3DS au <b>même Wi-Fi</b> que cet ordinateur.</li>
+          <li>Lancez <b>Anemone3DS</b>, appuyez sur <b>R</b> pour ouvrir le lecteur QR.</li>
+          <li>Visez ce code : le thème se télécharge et s'ajoute à la liste.</li>
+          <li>Sélectionnez-le puis appuyez sur <b>A</b> pour l'appliquer.</li>
+        </ol>
+      </div>
+      <div class="qr-url"><code id="qrUrl"></code></div>
+      <div class="row qr-foot">
+        <div class="field"><label>Interface réseau</label><select id="qrIp"></select></div>
+        <div class="qr-status" id="qrStatus">Serveur local actif — gardez cette fenêtre ouverte.</div>
+      </div>
+      <p class="tip">Si rien ne se passe : autorisez « 3DS Theme Studio » dans le pare-feu (Windows le demande au premier lancement).</p>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>

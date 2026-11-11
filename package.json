@@ -1,0 +1,44 @@
+{
+  "name": "3ds-theme-studio",
+  "productName": "3DS Theme Studio",
+  "version": "1.0.0",
+  "description": "Créez facilement des thèmes 3DS et installez-les avec Anemone3DS via un QR code local.",
+  "main": "src/main.js",
+  "author": "heivoli-network.fr",
+  "homepage": "https://heivoli-network.fr",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/core.test.js",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:win": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "fr.heivoli-network.3dsthemestudio",
+    "productName": "3DS Theme Studio",
+    "copyright": "© heivoli-network.fr",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["src/**/*", "build/icon.png", "package.json"],
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "icon": "build/icon.png",
+      "identity": null
+    },
+    "dmg": { "artifactName": "3DS-Theme-Studio-${version}-mac-${arch}.${ext}" },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }, { "target": "portable", "arch": ["x64"] }],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "3DS-Theme-Studio-${version}-windows-setup.${ext}"
+    },
+    "portable": { "artifactName": "3DS-Theme-Studio-${version}-windows-portable.${ext}" }
+  }
+}
