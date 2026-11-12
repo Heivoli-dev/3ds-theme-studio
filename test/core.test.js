@@ -63,6 +63,22 @@ fs.writeFileSync(path.join(out, 'theme.zip'), zip);
   console.log('limites ok — body pire cas', worst.sizes.body, 'octets /', LIMITS.body);
 }
 
+// Mises à jour
+{
+  const { compareVersions, parseRelease, assetNameFor } = require('../src/lib/update');
+  assert.strictEqual(compareVersions('1.0.10', '1.0.9'), 1);
+  assert.strictEqual(compareVersions('v1.1.0', '1.1.0'), 0);
+  assert.strictEqual(compareVersions('1.0.1', '1.1.0'), -1);
+  const rel = { tag_name: 'v1.2.0', html_url: 'https://github.com/Heivoli-dev/3ds-theme-studio/releases/tag/v1.2.0',
+    assets: ['Mac-Apple-Silicon.dmg', 'Mac-Intel.dmg', 'Windows-Setup.exe', 'Windows-Portable.exe'].map((n) => ({ name: '3DS-Theme-Studio-' + n, browser_download_url: 'https://dl/' + n })) };
+  assert.strictEqual(parseRelease(rel, '1.1.0', { platform: 'darwin', arch: 'arm64' }).url, 'https://dl/Mac-Apple-Silicon.dmg');
+  assert.strictEqual(parseRelease(rel, '1.1.0', { platform: 'win32', arch: 'x64', portable: true }).url, 'https://dl/Windows-Portable.exe');
+  assert.strictEqual(parseRelease(rel, '1.1.0', { platform: 'win32', arch: 'x64' }).newer, true);
+  assert.strictEqual(parseRelease(rel, '1.2.0', { platform: 'darwin', arch: 'x64' }).newer, false);
+  assert.strictEqual(assetNameFor('linux'), null);
+  console.log('mises à jour ok');
+}
+
 // QR
 for (const [i, url] of ['http://192.168.1.42:8383/theme/Mon_Theme.zip', 'http://10.0.0.5:8383/theme/' + 'x'.repeat(150) + '.zip'].entries()) {
   const m = qr.encode(url);

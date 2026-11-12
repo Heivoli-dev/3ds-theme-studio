@@ -41,6 +41,13 @@ a { color: var(--text); font-weight: 700; text-decoration: none; }
 
 /* Layout */
 .layout { display: grid; grid-template-columns: 340px 1fr; height: calc(100% - 66px); }
+body.has-update .layout { height: calc(100% - 66px - 52px); }
+.update-bar { height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 22px; background: var(--soft); border-bottom: 1px solid var(--line); }
+.update-bar p { margin: 0; flex: 1; }
+.update-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px rgba(31,157,99,.18); }
+button.link { background: none; border: 0; padding: 0 4px; color: var(--text); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; border-radius: 0; }
+button.link:hover { background: none; color: var(--muted); }
+.update-bar button.link { color: var(--muted); }
 .panel { background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
 .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 12px; padding: 4px; background: var(--soft); border-radius: 999px; }
 .tabs button { background: transparent; color: var(--muted); padding: 7px 4px; }

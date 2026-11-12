@@ -11,5 +11,9 @@ contextBridge.exposeInMainWorld('studio', {
   stopQr: () => ipcRenderer.invoke('qr:stop'),
   saveProject: (json) => ipcRenderer.invoke('project:save', json),
   openProject: () => ipcRenderer.invoke('project:open'),
+  checkUpdate: () => ipcRenderer.invoke('update:check'),
+  openUpdate: (url) => ipcRenderer.invoke('update:open', url),
+  appVersion: () => ipcRenderer.invoke('app:version'),
+  onUpdate: (cb) => ipcRenderer.on('update:available', (_e, d) => cb(d)),
   onDownloaded: (cb) => ipcRenderer.on('qr:downloaded', (_e, d) => cb(d)),
 });

@@ -18,6 +18,7 @@ Application **macOS et Windows** pour créer des thèmes de menu HOME 3DS en que
 - **Export .zip** compatible Anemone3DS (`body_LZ.bin`, `info.smdh`, `preview.png`, `bgm.bcstm`).
 - **QR code local** : l'application lance un mini-serveur sur votre réseau, la 3DS scanne et télécharge le thème directement.
 - Projets enregistrables (`.3dstheme`).
+- **Mises à jour** : au démarrage, l'appli vérifie s'il existe une nouvelle version sur GitHub et propose de la télécharger (ou bouton « Mises à jour » en bas du panneau).
 - Aucune dépendance d'exécution : encodeur LZ11, textures RGB565, SMDH, ZIP et QR code écrits from scratch.
 
 ## Installer

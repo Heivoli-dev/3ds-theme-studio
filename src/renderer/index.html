@@ -23,6 +23,15 @@
     </div>
   </header>
 
+  <div class="update-bar hidden" id="updateBar">
+    <span class="update-dot"></span>
+    <p><b>Nouvelle version disponible : <span id="updVersion"></span></b> <span class="dim">— vous utilisez la <span id="updCurrent"></span></span></p>
+    <button class="primary small" id="updDownload">Télécharger</button>
+    <button class="ghost small" id="updNotes">Nouveautés</button>
+    <button class="ghost small" id="updLater">Plus tard</button>
+    <button class="link small" id="updSkip">Ignorer cette version</button>
+  </div>
+
   <main class="layout">
     <!-- Panneau d'édition -->
     <aside class="panel">
@@ -156,7 +165,7 @@
         <div class="size-bar"><i id="sizeBar"></i></div>
         <p id="sizeDetail"></p>
       </div>
-      <footer class="panel-foot">© <span id="year"></span> <a href="https://heivoli-network.fr" target="_blank">heivoli-network.fr</a></footer>
+      <footer class="panel-foot">© <span id="year"></span> <a href="https://heivoli-network.fr" target="_blank">heivoli-network.fr</a> · <span id="appVersion">v—</span> · <button class="link" id="btnCheckUpdate">Mises à jour</button></footer>
     </aside>
 
     <!-- Aperçu -->

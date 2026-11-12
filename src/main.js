@@ -8,6 +8,9 @@ const http = require('http');
 const os = require('os');
 const { buildTheme, safeFileName, LIMITS } = require('./lib/theme');
 const qr = require('./lib/qr');
+const { checkForUpdate } = require('./lib/update');
+
+const updateEnv = () => ({ platform: process.platform, arch: process.arch, portable: !!process.env.PORTABLE_EXECUTABLE_DIR });
 
 let win;
 let current = null; // { name, zip }
@@ -30,6 +33,15 @@ function createWindow() {
     },
   });
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  // Vérification automatique des mises à jour, quelques secondes après l'ouverture
+  win.webContents.once('did-finish-load', () => {
+    setTimeout(async () => {
+      try {
+        const u = await checkForUpdate(app.getVersion(), updateEnv());
+        if (u.newer && win && !win.isDestroyed()) win.webContents.send('update:available', u);
+      } catch { /* hors ligne : on réessaiera au prochain lancement */ }
+    }, 3000);
+  });
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
 }
 
@@ -142,6 +154,15 @@ ipcMain.handle('image:fetch', async (_e, url) => {
   if (buf.length > 25 * 1024 * 1024) throw new Error('Image trop lourde (25 Mo max)');
   return `data:${type};base64,${buf.toString('base64')}`;
 });
+
+ipcMain.handle('update:check', async () => {
+  try { return { ok: true, ...(await checkForUpdate(app.getVersion(), updateEnv())) }; }
+  catch (e) { return { ok: false, current: app.getVersion(), error: 'Impossible de joindre GitHub. Vérifiez votre connexion.' }; }
+});
+ipcMain.handle('update:open', (_e, url) => {
+  if (/^https:\/\/github\.com\/Heivoli-dev\/3ds-theme-studio\//.test(String(url))) shell.openExternal(url);
+});
+ipcMain.handle('app:version', () => app.getVersion());
 
 ipcMain.handle('qr:stop', () => { stopServer(); return true; });
 

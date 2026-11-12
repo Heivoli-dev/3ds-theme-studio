@@ -686,8 +686,36 @@ function toast(msg, err = false) {
   toastTimer = setTimeout(() => t.classList.add('hidden'), 3800);
 }
 
+/* ---------- Mises à jour ---------- */
+function initUpdates() {
+  let info = null;
+  const skipped = () => { try { return localStorage.getItem('skipVersion'); } catch { return null; } };
+  const show = (u) => {
+    info = u;
+    $('#updVersion').textContent = `v${u.latest}`;
+    $('#updCurrent').textContent = `v${u.current}`;
+    $('#updateBar').classList.remove('hidden');
+    document.body.classList.add('has-update');
+  };
+  const hide = () => { $('#updateBar').classList.add('hidden'); document.body.classList.remove('has-update'); };
+  window.studio.appVersion().then((v) => ($('#appVersion').textContent = `v${v}`));
+  window.studio.onUpdate((u) => { if (skipped() !== u.latest) show(u); });
+  $('#updDownload').onclick = () => { window.studio.openUpdate(info.url); toast('Téléchargement lancé dans votre navigateur. Installez la nouvelle version, puis relancez l’appli.'); };
+  $('#updNotes').onclick = () => window.studio.openUpdate(info.page);
+  $('#updLater').onclick = hide;
+  $('#updSkip').onclick = () => { try { localStorage.setItem('skipVersion', info.latest); } catch {} hide(); };
+  $('#btnCheckUpdate').onclick = async () => {
+    toast('Recherche de mises à jour…');
+    const r = await window.studio.checkUpdate();
+    if (!r.ok) return toast(r.error, true);
+    if (r.newer) { try { localStorage.removeItem('skipVersion'); } catch {} show(r); toast(`La version v${r.latest} est disponible !`); }
+    else toast(`Vous avez la dernière version (v${r.current}) ✔`);
+  };
+}
+
 initPanel();
 initStage();
 initActions();
+initUpdates();
 syncPanel();
 scheduleRender();
