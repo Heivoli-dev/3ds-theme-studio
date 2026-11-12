@@ -82,6 +82,17 @@ jobs:
             | Mac Apple Silicon (M1 et plus) | 3DS-Theme-Studio-Mac-Apple-Silicon.dmg |
             | Mac Intel | 3DS-Theme-Studio-Mac-Intel.dmg |
 
-            **macOS** : au premier lancement, macOS bloque l'app (développeur non identifié).
-            Ouvrez Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ».
-            Ou dans le Terminal : `xattr -cr "/Applications/3DS Theme Studio.app"`
+            ### 🍎 Installer sur Mac
+            Au premier lancement, ton Mac peut afficher : *« Apple n'a pas pu confirmer que 3DS Theme Studio ne contenait pas de logiciel malveillant… »*
+
+            **Pas de panique, c'est normal !** macOS affiche ce message pour toutes les applis qui ne viennent pas de l'App Store. 3DS Theme Studio est gratuit et open source.
+
+            **Pour l'ouvrir (une seule fois) :**
+            1. Clique sur **Terminé** — **pas** sur « Placer dans la corbeille ».
+            2. Ouvre **Réglages Système → Confidentialité et sécurité**.
+            3. Tout en bas, clique sur **Ouvrir quand même** à côté de 3DS Theme Studio.
+            4. Confirme avec ton mot de passe ou Touch ID, puis clique sur **Ouvrir**.
+
+            *Le bouton n'apparaît pas ?* Dans le Terminal : `xattr -cr "/Applications/3DS Theme Studio.app"`
+
+            Un souci ? Ouvre un ticket sur https://heivoli-network.fr/tickets.html
