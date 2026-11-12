@@ -4,6 +4,10 @@
 'use strict';
 
 const TOP_W = 412, TOP_H = 240, BOT_W = 320, BOT_H = 240;
+// Limites (identiques à src/lib/theme.js)
+const LIMITS = { body: 0x150000, bgm: 0x337000, preview: 512 * 1024, total: 5 * 1024 * 1024 };
+const MAX_IMAGE_SIDE = 2048; // les images importées sont réduites à 2048 px max
+const fmtKo = (n) => (n >= 1024 * 1024 ? `${(n / 1048576).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} Mo` : `${Math.ceil(n / 1024).toLocaleString('fr-FR')} Ko`);
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
@@ -183,6 +187,7 @@ function scheduleRender() {
     renderScreen('top');
     renderScreen('bottom');
     blit();
+    scheduleMeasure();
   });
 }
 
@@ -257,7 +262,8 @@ function initPanel() {
   sw.title = 'Clic : couleur 1 — Maj + clic : couleur 2';
 
   setupDrop($('#drop'), $('#fileImage'), async (file) => {
-    const url = await readAsDataURL(file);
+    const url = await limitImage(await readAsDataURL(file));
+    if (!url) return toast('Image illisible', true);
     Object.assign(state[screenOf()], { image: url, mode: 'image', zoom: 1, ox: 0, oy: 0 });
     syncPanel(); scheduleRender();
   });
@@ -278,19 +284,19 @@ function initPanel() {
   }));
   $('#fileIcon').onchange = async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    state.icon = { mode: 'image', image: await readAsDataURL(f) };
+    state.icon = { mode: 'image', image: await limitImage(await readAsDataURL(f), 512) };
     e.target.value = '';
     syncPanel(); scheduleRender();
   };
 
   setupDrop($('#dropBgm'), $('#fileBgm'), async (file) => {
     if (!/\.bcstm$/i.test(file.name)) return toast('Le fichier doit être au format .bcstm', true);
-    if (file.size > 3371008) toast('Attention : plus de 3,3 Mo, la console risque de refuser la musique', true);
+    if (file.size > LIMITS.bgm) return toast(`Musique trop lourde : ${fmtKo(file.size)} (maximum ${fmtKo(LIMITS.bgm)}). Raccourcissez-la ou baissez sa qualité.`, true);
     const buf = new Uint8Array(await file.arrayBuffer());
     state.bgm = { name: file.name, size: file.size, b64: bytesToB64(buf) };
-    syncPanel();
+    syncPanel(); scheduleMeasure();
   });
-  $('#btnRemoveBgm').onclick = () => { state.bgm = null; syncPanel(); };
+  $('#btnRemoveBgm').onclick = () => { state.bgm = null; syncPanel(); scheduleMeasure(); };
 
   $('#optOverlay').onchange = (e) => { state.overlay = e.target.checked; syncPanel(); };
   $('#optShell').onchange = (e) => { state.shell = e.target.checked; syncPanel(); };
@@ -326,7 +332,9 @@ async function imageFromTransfer(dt) {
   try { return await window.studio.fetchImage(url); }
   catch (e) { toast(e.message, true); return null; }
 }
-function applyImage(which, url) {
+async function applyImage(which, raw) {
+  const url = await limitImage(raw);
+  if (!url) return toast('Image illisible', true);
   if (tab === 'info') { state.icon = { mode: 'image', image: url }; syncPanel(); scheduleRender(); return toast('Icône mise à jour'); }
   tab = which;
   Object.assign(state[which], { image: url, mode: 'image', zoom: 1, ox: 0, oy: 0 });
@@ -351,6 +359,25 @@ document.addEventListener('paste', async (e) => {
   if (url) applyImage(screenOf(), url);
   else toast("Copiez une image (clic droit → Copier l'image) puis recollez", true);
 });
+
+/** Réduit une image trop grande (côté max 2048 px) pour garder thèmes et projets légers. */
+function limitImage(url, max = MAX_IMAGE_SIDE) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
+      if (k === 1 && url.length < 4 * 1024 * 1024) return resolve(url);
+      const cv = Object.assign(document.createElement('canvas'), { width: Math.round(w * k), height: Math.round(h * k) });
+      const ctx = cv.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      const png = /^data:image\/(png|gif|webp)/.test(url) ? cv.toDataURL('image/png') : null;
+      resolve(png && png.length < 4 * 1024 * 1024 ? png : cv.toDataURL('image/jpeg', 0.9));
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
 
 const readAsDataURL = (file) => new Promise((res, rej) => {
   const r = new FileReader();
@@ -434,7 +461,7 @@ function initStage() {
   $('#btnPhoto').onclick = () => $('#filePhoto').click();
   $('#filePhoto').onchange = async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    state.device.photo = await readAsDataURL(f);
+    state.device.photo = await limitImage(await readAsDataURL(f), 2400);
     e.target.value = '';
     syncPanel();
     document.body.classList.add('calibrating');
@@ -553,9 +580,13 @@ async function previewPng() {
 }
 
 async function build() {
-  renderScreen('top'); renderScreen('bottom');
   if (!state.info.title.trim()) throw new Error('Donnez un nom à votre thème (onglet Infos)');
-  return window.studio.buildTheme({
+  return window.studio.buildTheme(await makePayload());
+}
+
+async function makePayload() {
+  renderScreen('top'); renderScreen('bottom');
+  return {
     top: pixels(full.top),
     bottom: pixels(full.bottom),
     icon48: iconPixels(48),
@@ -565,7 +596,30 @@ async function build() {
     title: state.info.title.trim(),
     description: state.info.description.trim(),
     author: state.info.author.trim(),
-  });
+  };
+}
+
+let measureTimer = 0, measureSeq = 0;
+function scheduleMeasure() {
+  clearTimeout(measureTimer);
+  measureTimer = setTimeout(async () => {
+    const seq = ++measureSeq;
+    const r = await window.studio.measureTheme(await makePayload());
+    if (seq === measureSeq) showSize(r);
+  }, 700);
+}
+function showSize(r) {
+  const m = $('#sizeMeter');
+  if (!r) return;
+  const s = r.sizes || {};
+  const ratio = r.ok ? Math.max(s.body / LIMITS.body, s.bgm / LIMITS.bgm, s.total / LIMITS.total) : 1;
+  m.classList.toggle('over', !r.ok);
+  m.classList.toggle('warn', r.ok && ratio > 0.8);
+  $('#sizeBar').style.width = `${Math.min(100, Math.max(2, ratio * 100))}%`;
+  $('#sizeText').textContent = r.ok ? `${fmtKo(s.total)} / ${fmtKo(LIMITS.total)}` : 'Trop lourd';
+  $('#sizeDetail').textContent = r.ok
+    ? `Images ${fmtKo(s.body)} · Musique ${s.bgm ? fmtKo(s.bgm) : '—'} · Aperçu ${fmtKo(s.preview)}`
+    : r.error;
 }
 
 function initActions() {

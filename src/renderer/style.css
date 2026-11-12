@@ -46,6 +46,15 @@ a { color: var(--text); font-weight: 700; text-decoration: none; }
 .tabs button { background: transparent; color: var(--muted); padding: 7px 4px; }
 .tabs button.active { background: #fff; color: var(--text); font-weight: 700; box-shadow: 0 1px 4px rgba(36,35,43,.12); }
 .tab-body { padding: 4px 16px 14px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+.size-meter { padding: 10px 16px 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+.size-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; }
+.size-row b { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 12px; }
+.size-bar { height: 6px; border-radius: 3px; background: var(--soft-2); overflow: hidden; }
+.size-bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--text); transition: width .3s, background .3s; }
+.size-meter.warn .size-bar i { background: #e08a1e; }
+.size-meter.over .size-bar i { background: var(--err); }
+.size-meter.over .size-row b, .size-meter.over p { color: var(--err); }
+.size-meter p { margin: 0; font-size: 11px; color: var(--muted); }
 .panel-foot { padding: 10px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; text-align: center; }
 
 .field { display: flex; flex-direction: column; gap: 6px; flex: 1; }

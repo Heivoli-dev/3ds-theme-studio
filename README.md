@@ -33,8 +33,9 @@ Téléchargez la dernière version dans l'onglet **Releases** :
 
 Aussi disponible sur <https://heivoli-network.fr/logiciels.html>.
 
-> **macOS** : l'application n'est pas signée. Au premier lancement, faites clic droit → **Ouvrir**, ou exécutez
-> `xattr -dr com.apple.quarantine "/Applications/3DS Theme Studio.app"`.
+> **macOS** : glissez l'app dans **Applications**. Au premier lancement, macOS la bloque (développeur non identifié) :
+> ouvrez **Réglages Système → Confidentialité et sécurité**, puis cliquez sur **Ouvrir quand même**.
+> Ou dans le Terminal : `xattr -cr "/Applications/3DS Theme Studio.app"`.
 >
 > **Windows** : SmartScreen peut afficher un avertissement → « Informations complémentaires » → « Exécuter quand même ». Autorisez l'application dans le pare-feu pour le QR code.
 
@@ -55,7 +56,11 @@ Sans réseau : **Exporter le .zip** puis copiez-le dans `/Themes/` à la racine 
 | Écran du bas | 320 × 240 px |
 | Icône | 48 × 48 px (+ 24 × 24 générée) |
 | Aperçu | 412 × 480 px |
-| Musique | BCSTM, 3,3 Mo max |
+| Musique | BCSTM, 3 292 Ko max |
+| Images du thème (body_LZ.bin) | 1 344 Ko max |
+| Thème complet (.zip) | 5 Mo max |
+
+Une jauge « Poids du thème » indique en direct la taille du thème. Les images importées sont réduites à 2048 px maximum.
 
 ## Développement
 

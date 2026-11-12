@@ -1,7 +1,7 @@
 {
   "name": "3ds-theme-studio",
   "productName": "3DS Theme Studio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Créez facilement des thèmes 3DS et installez-les avec Anemone3DS via un QR code local.",
   "main": "src/main.js",
   "author": "heivoli-network.fr",
@@ -76,6 +76,7 @@
     },
     "portable": {
       "artifactName": "3DS-Theme-Studio-Windows-Portable.${ext}"
-    }
+    },
+    "afterPack": "build/adhoc-sign.js"
   }
 }

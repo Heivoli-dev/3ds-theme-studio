@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const os = require('os');
-const { buildThemeZip, safeFileName } = require('./lib/theme');
+const { buildTheme, safeFileName, LIMITS } = require('./lib/theme');
 const qr = require('./lib/qr');
 
 let win;
@@ -83,16 +83,30 @@ function stopServer() {
 
 function toU8(x) { return x ? new Uint8Array(x) : undefined; }
 
-ipcMain.handle('theme:build', (_e, t) => {
-  const name = safeFileName(t.title).replace(/ /g, '_');
-  const zip = buildThemeZip({
+function themeInput(t) {
+  return {
     top: toU8(t.top), bottom: toU8(t.bottom),
     icon48: toU8(t.icon48), icon24: toU8(t.icon24),
     preview: toU8(t.preview), bgm: toU8(t.bgm),
     title: t.title, description: t.description, author: t.author,
-  });
+  };
+}
+
+ipcMain.handle('theme:build', (_e, t) => {
+  const name = safeFileName(t.title).replace(/ /g, '_');
+  const { zip, sizes } = buildTheme(themeInput(t));
   current = { name, zip };
-  return { name, size: zip.length };
+  return { name, size: zip.length, sizes, limits: LIMITS };
+});
+
+// Mesure la taille sans garder le thème (jauge de l'interface)
+ipcMain.handle('theme:measure', (_e, t) => {
+  try {
+    const { sizes } = buildTheme(themeInput(t));
+    return { ok: true, sizes, limits: LIMITS };
+  } catch (e) {
+    return { ok: false, error: e.message, limits: LIMITS };
+  }
 });
 
 ipcMain.handle('theme:save', async () => {

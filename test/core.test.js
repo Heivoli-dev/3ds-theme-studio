@@ -7,7 +7,7 @@ const lz11 = require('../src/lib/lz11');
 const { buildBody } = require('../src/lib/body');
 const { decodeRGB565Tiled } = require('../src/lib/texture');
 const { buildSmdh } = require('../src/lib/smdh');
-const { buildThemeZip } = require('../src/lib/theme');
+const { buildThemeZip, buildTheme, LIMITS } = require('../src/lib/theme');
 const qr = require('../src/lib/qr');
 
 function gradient(w, h) {
@@ -48,6 +48,20 @@ const zip = buildThemeZip({ top, bottom, icon48: gradient(48, 48), icon24: gradi
 const out = path.join(__dirname, 'out');
 fs.mkdirSync(out, { recursive: true });
 fs.writeFileSync(path.join(out, 'theme.zip'), zip);
+
+// Limites de taille
+{
+  const base = { top, bottom, icon48: gradient(48, 48), icon24: gradient(24, 24), preview: Buffer.from('89504e47', 'hex'), title: 'T', description: '', author: '' };
+  const { sizes } = buildTheme(base);
+  assert(sizes.body < LIMITS.body && sizes.total < LIMITS.total);
+  assert.throws(() => buildTheme({ ...base, bgm: new Uint8Array(LIMITS.bgm + 1) }), /musique/);
+  assert.throws(() => buildTheme({ ...base, preview: new Uint8Array(LIMITS.preview + 1) }), /aperçu/);
+  // bruit aléatoire = pire cas pour la compression des images
+  const noise = (w, h) => Uint8Array.from({ length: w * h * 4 }, () => Math.random() * 256 | 0);
+  const worst = buildTheme({ ...base, top: noise(412, 240), bottom: noise(320, 240) });
+  assert(worst.sizes.body < LIMITS.body, 'pire cas body');
+  console.log('limites ok — body pire cas', worst.sizes.body, 'octets /', LIMITS.body);
+}
 
 // QR
 for (const [i, url] of ['http://192.168.1.42:8383/theme/Mon_Theme.zip', 'http://10.0.0.5:8383/theme/' + 'x'.repeat(150) + '.zip'].entries()) {

@@ -40,6 +40,10 @@ jobs:
       - run: npm run ${{ matrix.script }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Vérifier la signature de l'app Mac
+        if: runner.os == 'macOS'
+        run: |
+          for app in dist/mac*/*.app; do codesign --verify --deep --strict --verbose=2 "$app"; codesign -dv "$app" 2>&1 | grep -E "Signature|Identifier"; done
       - name: Noms de fichiers stables
         if: runner.os == 'macOS'
         run: |
@@ -78,4 +82,6 @@ jobs:
             | Mac Apple Silicon (M1 et plus) | 3DS-Theme-Studio-Mac-Apple-Silicon.dmg |
             | Mac Intel | 3DS-Theme-Studio-Mac-Intel.dmg |
 
-            macOS : clic droit → Ouvrir au premier lancement (application non signée).
+            **macOS** : au premier lancement, macOS bloque l'app (développeur non identifié).
+            Ouvrez Réglages Système → Confidentialité et sécurité → « Ouvrir quand même ».
+            Ou dans le Terminal : `xattr -cr "/Applications/3DS Theme Studio.app"`

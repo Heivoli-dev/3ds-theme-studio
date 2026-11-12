@@ -148,9 +148,14 @@
           <input type="file" id="fileBgm" accept=".bcstm" hidden />
         </div>
         <button class="ghost small" id="btnRemoveBgm">Retirer la musique</button>
-        <p class="tip">La console lit uniquement le format <b>BCSTM</b> (3,3 Mo maximum pour un thème). Convertissez votre MP3/WAV avec un outil comme <i>vgmstream</i> / <i>LoopingAudioConverter</i>, puis importez le fichier ici.</p>
+        <p class="tip">La console lit uniquement le format <b>BCSTM</b> (3 292 Ko maximum : au-delà, le fichier est refusé). Convertissez votre MP3/WAV avec un outil comme <i>vgmstream</i> / <i>LoopingAudioConverter</i>, puis importez le fichier ici.</p>
       </section>
 
+      <div class="size-meter" id="sizeMeter" title="Limites : images 1 344 Ko · musique 3 292 Ko · thème complet 5 Mo">
+        <div class="size-row"><span>Poids du thème</span><b id="sizeText">…</b></div>
+        <div class="size-bar"><i id="sizeBar"></i></div>
+        <p id="sizeDetail"></p>
+      </div>
       <footer class="panel-foot">© <span id="year"></span> <a href="https://heivoli-network.fr" target="_blank">heivoli-network.fr</a></footer>
     </aside>
 
